@@ -68,8 +68,8 @@ static uint8_t control_input_pivot;
 ICACHE_RAM_ATTR void pin_control_vect() {
   uint8_t control_state = 0;
 
-  if (!control_input_pivot && GPIP(CONTROL_INPUT_GPIO_PIN)) {
-
+  if (!control_input_pivot && !CONTROL_PORT_INPUTS) {
+    cli();
     // Go through all control input pins, setting only one bit to 0 at a time
     // and check if the physical pin is off for that combination
     for (control_input_pivot = 1; control_input_pivot; control_input_pivot <<= 1) {
@@ -82,6 +82,7 @@ ICACHE_RAM_ATTR void pin_control_vect() {
         }
       }
     }
+    sei();
     CONTROL_PORT_INPUTS = control_state;
 
     // Put all shift register inputs back to zero
@@ -124,7 +125,7 @@ void system_execute_startup(char *line)
 {
   uint8_t n;
   for (n=0; n < N_STARTUP_LINE; n++) {
-    delay(0);
+    ///delay(0);
     if (!(settings_read_startup_line(n, line))) {
       line[0] = 0;
       report_execute_startup_message(line,STATUS_SETTING_READ_FAIL, CLIENT_SERIAL);
@@ -238,7 +239,7 @@ uint8_t system_execute_line(char *line, uint8_t client)
               if(line[char_counter++] != '=') { return(STATUS_INVALID_STATEMENT); }
               helper_var = char_counter; // Set helper variable as counter to start of user info line.
               do {
-                delay(0);
+                ///delay(0);
                 line[char_counter-helper_var] = line[char_counter];
               } while (line[char_counter++] != 0);
               settings_store_build_info(line);
@@ -265,7 +266,7 @@ uint8_t system_execute_line(char *line, uint8_t client)
         case 'N' : // Startup lines. [IDLE/ALARM]
           if ( line[++char_counter] == 0 ) { // Print startup lines
             for (helper_var=0; helper_var < N_STARTUP_LINE; helper_var++) {
-              delay(0);
+              ///delay(0);
               if (!(settings_read_startup_line(helper_var, line))) {
                 report_status_message(STATUS_SETTING_READ_FAIL, CLIENT_ALL);
               } else {
@@ -285,7 +286,7 @@ uint8_t system_execute_line(char *line, uint8_t client)
             // Prepare sending gcode block to gcode parser by shifting all characters
             helper_var = char_counter; // Set helper variable as counter to start of gcode block
             do {
-              delay(0);
+              ///delay(0);
               line[char_counter-helper_var] = line[char_counter];
             } while (line[char_counter++] != 0);
             // Execute gcode block to ensure block is valid.

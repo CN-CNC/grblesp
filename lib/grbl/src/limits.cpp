@@ -87,8 +87,8 @@ static uint8_t limit_input_pivot;
 ICACHE_RAM_ATTR void pin_limit_vect() {
   uint8_t limit_state = 0;
 
-  if (!limit_input_pivot && GPIP(LIMIT_INPUT_GPIO_PIN)) {
-
+  if (!limit_input_pivot && !LIMIT_PORT_INPUTS) {
+    cli();
     // Go through all limit input pins, setting only one bit to 0 at a time
     // and check if the physical pin is off for that combination
     for (limit_input_pivot = 1; limit_input_pivot; limit_input_pivot <<= 1) {
@@ -101,6 +101,7 @@ ICACHE_RAM_ATTR void pin_limit_vect() {
         }
       }
     }
+    sei();
     LIMIT_PORT_INPUTS = limit_state;
 
     // Put all shift register inputs back to zero
@@ -177,8 +178,8 @@ void limits_go_home(uint8_t cycle_mask)
 
   uint8_t limit_state, axislock, n_active_axis;
   do {
-    ESP.wdtFeed();
-    delay(0);
+    ///ESP.wdtFeed();
+    ///delay(0);
     system_convert_array_steps_to_mpos(target,sys_position);
 
     // Initialize and declare variables needed for homing routine.
@@ -226,8 +227,8 @@ void limits_go_home(uint8_t cycle_mask)
     st_prep_buffer(); // Prep and fill segment buffer from newly planned block.
     st_wake_up(); // Initiate motion
     do {
-      ESP.wdtFeed();
-      delay(0);
+      ///ESP.wdtFeed();
+      ///delay(0);
       if (approach) {
         // Check limit state. Lock out cycle axes when they change.
         limit_state = limits_get_state();
@@ -344,8 +345,8 @@ void limits_soft_check(float *target)
     if (sys.state == STATE_CYCLE) {
       system_set_exec_state_flag(EXEC_FEED_HOLD);
       do {
-        ESP.wdtFeed();
-        delay(0);
+        ///ESP.wdtFeed();
+        ///delay(0);
         protocol_execute_realtime();
         if (sys.abort) { return; }
       } while ( sys.state != STATE_IDLE );

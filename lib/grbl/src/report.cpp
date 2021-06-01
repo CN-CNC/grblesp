@@ -32,11 +32,19 @@
 // this is a generic send function that everything should use, so interfaces could be added (Bluetooth, etc)
 void grbl_send(uint8_t client, const char *text)
 {
-	if ( client == CLIENT_WEBSOCKET || client == CLIENT_ALL )
-		Serial2Socket.write((const uint8_t*)text, strlen(text));
-
-	if ( client == CLIENT_SERIAL || client == CLIENT_ALL )
-		Serial.print(text);
+#ifdef ENABLE_WEBSOCKET
+  if ( client == CLIENT_WEBSOCKET || client == CLIENT_ALL ) {
+    Serial2Socket.write((const uint8_t*)text, strlen(text));
+  }
+#endif
+#ifdef ENABLE_TELNET
+  if ( client == CLIENT_TELNET || client == CLIENT_ALL ) {
+    telnetServer.write((const uint8_t*)text, strlen(text));
+  }
+#endif
+  if ( client == CLIENT_SERIAL || client == CLIENT_ALL ) {
+    Serial.print(text);
+  }
 }
 
 // Taken from Grbl_Esp32
@@ -274,12 +282,13 @@ void report_ngc_parameters(uint8_t client)
 {
   float coord_data[N_AXIS];
   uint8_t coord_select;
-  char temp[60];
-  char ngc_rpt[500];
+  char temp[100];
+  char ngc_rpt[1000];
 
   ngc_rpt[0] = '\0';
-
   for (coord_select = 0; coord_select <= SETTING_INDEX_NCOORD; coord_select++) {
+    ///ESP.wdtFeed();
+    ///delay(0);
     if (!(settings_read_coord_data(coord_select,coord_data))) {
       report_status_message(STATUS_SETTING_READ_FAIL, client);
       return;
@@ -311,9 +320,7 @@ void report_ngc_parameters(uint8_t client)
     sprintf(temp, "%4.3f]\r\n", gc_state.tool_length_offset);
   }
   strcat(ngc_rpt, temp);
-
   grbl_send(client, ngc_rpt);
-
   report_probe_parameters(client);
 }
 
@@ -481,9 +488,6 @@ void report_build_info(char *line, uint8 client)
 
   strcat(build_info,"]\r\n");
   grbl_send(client, build_info); // ok to send to all
-  #if defined (ENABLE_WIFI)
-    grbl_send(client, (char *)wifi_config.info());
-  #endif
 
   #ifdef LIMITS_TWO_SWITCHES_ON_AXES
     strcat(build_info,"L");
@@ -577,7 +581,14 @@ void report_realtime_status(uint8_t client)
   // Returns planner and serial read buffer states.
   #ifdef REPORT_FIELD_BUFFER_STATE
   if (bit_istrue(settings.status_report_mask,BITFLAG_RT_STATUS_BUFFER_STATE)) {
-    int bufsize = serial_get_rx_buffer_available(client);
+    int bufsize;
+    if (client == CLIENT_TELNET) {
+#ifdef ENABLE_TELNET
+      bufsize = telnetServer.get_rx_buffer_available();
+#endif
+    } else {
+      bufsize = serial_get_rx_buffer_available(client);
+    }
     sprintf(temp, "|Bf:%d,%d", plan_get_block_buffer_available(), bufsize);
     strcat(status, temp);
   }

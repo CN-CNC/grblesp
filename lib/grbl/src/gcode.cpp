@@ -115,7 +115,7 @@ uint8_t gc_execute_line(char *line, uint8_t client)
   else { char_counter = 0; }
 
   while (line[char_counter] != 0) { // Loop until no more g-code words in line.
-    delay(0);
+    ///delay(0);
     // Import the next g-code word, expecting a letter followed by a value. Otherwise, error out.
     letter = line[char_counter];
     if((letter < 'A') || (letter > 'Z')) { FAIL(STATUS_EXPECTED_COMMAND_LETTER); } // [Expected word letter]
@@ -252,12 +252,12 @@ uint8_t gc_execute_line(char *line, uint8_t client)
             }
             break;
           case 3: case 4: case 5:
-            word_bit = MODAL_GROUP_M7;
+            /*word_bit = MODAL_GROUP_M7;
             switch(int_value) {
               case 3: gc_block.modal.spindle = SPINDLE_ENABLE_CW; break;
               case 4: gc_block.modal.spindle = SPINDLE_ENABLE_CCW; break;
               case 5: gc_block.modal.spindle = SPINDLE_DISABLE; break;
-            }
+            }*/
             break;
           #ifdef ENABLE_M7
             case 7: case 8: case 9:

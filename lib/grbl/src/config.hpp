@@ -27,8 +27,6 @@
 
 #ifndef config_h
 #define config_h
-#include "grbl.hpp" // For Arduino IDE compatibility.
-
 
 // Define CPU pin map and default settings.
 // NOTE: OEMs can avoid the need to maintain/update the defaults.h and cpu_map.h files and use only
@@ -43,7 +41,9 @@
 
 #define GRBL_MSG_LEVEL MSG_LEVEL_INFO // what level of [MSG:....] do you want to see 0=all off
 
-#define ENABLE_SERIAL2SOCKET    // Enables socket serial communication
+#define ENABLE_WIFI             // Enables wifi needed for websocket, telnet, etc
+#define ENABLE_WEBSOCKET    // Enables socket serial communication
+#define ENABLE_TELNET           // Enables telnet communication
 
 // Define realtime command special characters. These characters are 'picked-off' directly from the
 // serial read data stream and are not passed to the grbl line execution parser. Select characters
@@ -305,7 +305,7 @@
 // frequencies below 10kHz, where the aliasing between axes of multi-axis motions can cause audible
 // noise and shake your machine. At even lower step frequencies, AMASS adapts and provides even better
 // step smoothing. See stepper.c for more details on the AMASS system works.
-#define ADAPTIVE_MULTI_AXIS_STEP_SMOOTHING  // Default enabled. Comment to disable.
+//#define ADAPTIVE_MULTI_AXIS_STEP_SMOOTHING  // Default enabled. Comment to disable.
 
 // Sets the maximum step rate allowed to be written as a Grbl setting. This option enables an error
 // check in the settings module to prevent settings values that will exceed this limitation. The maximum

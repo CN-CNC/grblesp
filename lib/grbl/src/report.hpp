@@ -86,8 +86,20 @@
 
 #define CLIENT_SERIAL     1
 #define CLIENT_WEBSOCKET  2
+#define CLIENT_TELNET     3
 #define CLIENT_ALL        0xFF
-#define CLIENT_COUNT      2 // total number of client types regardless if they are used
+#define CLIENT_COUNT      3 // total number of client types regardless if they are used
+
+#define MSG_LEVEL_NONE		0 // set GRBL_MSG_LEVEL in config.h to the level you want to see
+#define MSG_LEVEL_ERROR		1
+#define MSG_LEVEL_WARNING	2
+#define MSG_LEVEL_INFO		3
+#define MSG_LEVEL_DEBUG		4
+#define MSG_LEVEL_VERBOSE	5
+
+// functions to send data to the user (from Grbl_Esp32)
+void grbl_send(uint8_t client, const char *text);
+void grbl_sendf(uint8_t client, const char *format, ...);
 
 #define MSG_LEVEL_NONE		0 // set GRBL_MSG_LEVEL in config.h to the level you want to see
 #define MSG_LEVEL_ERROR		1
